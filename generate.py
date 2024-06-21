@@ -5,16 +5,16 @@ import sys
 import textwrap
 from datetime import datetime
 
-# Check if we're running windows
+# Check if we're running Windows
 is_windows = sys.platform.startswith('win')
 
 if is_windows:
     import win32com.client
 else:
     try:
-        import pylnk
+        import pylnk3
     except ImportError:
-        print("You must install liblnk's python bindings for non-windows machines!")
+        print("You must install pylnk3 for non-Windows machines!")
         sys.exit(1)
 
 banner = r"""\
@@ -113,7 +113,7 @@ def main(args):
         link.save()
     else:
         filepath = '{}/{}'.format(os.getcwd(), args.output)
-        link = for_file(r'C:\Windows\System32\cmd.exe', filepath)
+        link = pylnk3.for_file(r'C:\Windows\System32\cmd.exe', filepath)
         link.arguments = '/c ' + target
         link.target = target
         link.icon = icon
@@ -124,14 +124,14 @@ def main(args):
     print(f'Link created at {args.output} with UNC path {icon}.')
 
 """
-These functions are helper functions from pylnk that assumed the lnk
+These functions are helper functions from pylnk3 that assumed the lnk
 file was for the same OS it was being created on. For our purposes, our
 target is windows only, so I've adjusted them to assume a windows
 target to avoid errors.
 """
 
 def for_file(target_file, lnk_name=None):
-    lnk = pylnk.create(lnk_name)
+    lnk = pylnk3.create(lnk_name)
 
     levels = target_file.split('\\')
     elements = [levels[0]]
@@ -140,14 +140,14 @@ def for_file(target_file, lnk_name=None):
         elements.append(segment)
     segment = create_for_path(levels[-1], False)
     elements.append(segment)
-    lnk.shell_item_id_list = pylnk.LinkTargetIDList()
+    lnk.shell_item_id_list = pylnk3.LinkTargetIDList()
     lnk.shell_item_id_list.items = elements
-    return pylnk.from_segment_list(elements, lnk_name)
+    return pylnk3.from_segment_list(elements, lnk_name)
 
 def create_for_path(path, isdir):
     now = datetime.now()
     return {
-        'type': pylnk.TYPE_FOLDER if isdir else pylnk.TYPE_FILE,
+        'type': pylnk3.TYPE_FOLDER if isdir else pylnk3.TYPE_FILE,
         'size': 272896,
         'created': now,
         'accessed': now,
