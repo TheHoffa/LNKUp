@@ -1,4 +1,6 @@
 # LNKUp
+Updated to be used with python3
+---
 LNK Data exfiltration payload generator
 ---
 This tool will allow you to generate LNK payloads. Upon rendering or being run, they will exfiltrate data.   
